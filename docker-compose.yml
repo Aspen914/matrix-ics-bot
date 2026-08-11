@@ -1,0 +1,13 @@
+services:
+  matrix-ics-bot:
+    image: matrix-ics-bot:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: matrix-ics-bot
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./config:/data/config:ro
+      - ./storage:/app/storage

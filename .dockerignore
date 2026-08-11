@@ -1,0 +1,14 @@
+.git
+.github
+.gitignore
+.dockerignore
+Dockerfile
+docker-compose.yml
+docker-compose.deploy.yml
+config
+storage
+lib
+node_modules
+*.log
+.env
+.idea
