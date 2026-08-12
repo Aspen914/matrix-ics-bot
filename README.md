@@ -105,8 +105,8 @@ To stop it: `docker compose down`. To update after a pull: `docker compose up -d
 
 #### Using a published image
 
-The project is set up to publish a pre-built image to the GitHub Container Registry. If you would
-rather not build locally, point your compose file at the published image instead of the local build:
+The project publishes a pre-built image to the GitHub Container Registry. If you would rather not
+build locally, point your compose file at the published image instead of the local build:
 
 ```
 services:
@@ -121,33 +121,26 @@ services:
       - ./storage:/app/storage
 ```
 
+To run this on a server, pull the image and bring it up yourself (deployment is manual — GitHub
+only builds and stores the image, it does not touch your server):
+
+```sh
+docker pull ghcr.io/<owner>/matrix-ics-bot:latest
+mkdir -p config storage
+cp config/default.yaml config/production.yaml   # then edit it with real values
+docker compose up -d
+```
+
 ### CI/CD with GitHub Actions
 
-The following workflows automate linting, building, and deploying the bot:
+The following workflows automate building and linting the project:
 
 - `.github/workflows/ci.yml` — runs `yarn lint` and `yarn build` on every push to `master` and on
   every pull request.
 - `.github/workflows/docker-publish.yml` — builds the Docker image and pushes it to GHCR
   (`ghcr.io/<owner>/matrix-ics-bot`) on pushes to `master` (tagged `latest`), on tags like `v1.0.0`,
-  and manually via `workflow_dispatch`.
-- `.github/workflows/docker-deploy.yml` — deploys the freshly published image to a server using
-  Docker Compose over SSH. It runs automatically after `docker-publish.yml` succeeds and can also be
-  triggered manually with a custom `image_tag`.
-
-To enable the deploy workflow, add the following repository secrets (Settings -> Secrets and
-variables -> Actions):
-
-| Secret              | Purpose                                                    |
-| ------------------- | ---------------------------------------------------------- |
-| `DEPLOY_HOST`       | IP address or hostname of the target server                |
-| `DEPLOY_USER`       | SSH user for the target server                             |
-| `DEPLOY_SSH_KEY`    | Private SSH key (with a passphrase only if it is a `.pem`) |
-| `DEPLOY_PORT`       | SSH port, defaults to `22` if omitted                      |
-
-The deploy job connects as `DEPLOY_USER` and manages everything under `/opt/matrix-ics-bot` on the
-server: it writes `docker-compose.yml`, runs `docker compose pull`, and starts the container with
-`docker compose up -d`. The `config/` and `storage/` directories are created next to the compose
-file; put your `production.yaml` in `/opt/matrix-ics-bot/config/` and it will be picked up.
+  and manually via `workflow_dispatch`. The image is only built and stored here; deployment to your
+  own servers is done by you (see "Using a published image" above).
 
 ## Upgrading
 
